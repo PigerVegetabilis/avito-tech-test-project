@@ -40,3 +40,22 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.AdsList{
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  margin: 0 auto;
+  gap: 5px;
+}
+
+.ad-card {
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border-radius: 15px;
+}
+
