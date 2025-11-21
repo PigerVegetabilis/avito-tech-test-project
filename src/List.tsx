@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import './App.css'
+import './List.css'
 import axios from 'axios'
+import { Button } from '@mui/material'
 
 function List() {
   const [ads, setAds] = useState([]);
@@ -41,9 +42,38 @@ function List() {
   if (error) return <div className="error">{error}</div>;
 
   return (
-    <>
-      
-    </>
+    <div className='AdsList'>
+      {
+        ads.map((ad : any) => (
+          <div key={ad.id} className='ad-card'>
+            <div className="ad-image">
+              <img src={ad.images?.[0].replace('.co', '.jp')} 
+              alt={ad.title} />
+            </div>
+
+            <div className="ad-content">
+              <h3 className="ad-title">{ad.title.split(':')[1]}</h3>
+              <p className="ad-price">{ad.price.toLocaleString()} ₽</p>
+              <p className="ad-category">{ad.category}</p>
+              <div className="ad-meta">
+                <span className='ad-status'>
+                  {ad.status + ' '} 
+                </span>
+                <span className='ad-prority'>
+                  {ad.priority + ' '}
+                </span>
+                <span className="ad-date">
+                  {new Date(ad.createdAt).toLocaleDateString('ru-RU')}
+                </span>
+              </div>
+
+            </div>
+
+            <Button variant='outlined'>Открыть</Button>
+          </div>
+        ))
+      }
+    </div>
   )
 }
 
