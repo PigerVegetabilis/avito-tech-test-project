@@ -55,7 +55,35 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 15px;
+  padding: 10px 15px;
   border-radius: 15px;
+  position: relative;
 }
 
+.ad-info{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.ad-content {
+  display: block;
+  text-align: left;
+  height: 100%;
+  padding-bottom: 9%;
+}
+
+.ad-content p{
+  margin: 0;
+}
+
+.ad-content h3{
+  margin-top: 0;
+  font-weight: 500;
+}
+
+.ad-image{
+  display: block;
+  margin-right: 0;
+}
