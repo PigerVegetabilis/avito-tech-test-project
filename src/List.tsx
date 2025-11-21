@@ -4,8 +4,10 @@ import viteLogo from '/vite.svg'
 import './List.css'
 import axios from 'axios'
 import { Button } from '@mui/material'
+import { Navigate, useNavigate } from 'react-router-dom'
 
 function List() {
+  const navigate = useNavigate();
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,7 +18,7 @@ function List() {
     page: 1,
     limit: 10
   });
-
+  
   const fetchAds = async () => {
     try {
       setLoading(true);
@@ -46,7 +48,8 @@ function List() {
       {
         ads.map((ad : any) => (
           <div key={ad.id} className='ad-card'>
-            <div className="ad-image">
+            <div className="ad-info">
+              <div className="ad-image">
               <img src={ad.images?.[0].replace('.co', '.jp')} 
               alt={ad.title} />
             </div>
@@ -68,8 +71,13 @@ function List() {
               </div>
 
             </div>
+            </div>
 
-            <Button variant='outlined'>Открыть</Button>
+            <Button 
+              variant='outlined' 
+              onClick={() => navigate(`/item/${ad.id}`)}>
+                Открыть
+              </Button>
           </div>
         ))
       }
