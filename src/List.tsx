@@ -3,7 +3,7 @@ import './List.css'
 import axios from 'axios'
 import { Button, Checkbox, FormControl,
   FormControlLabel, FormGroup, TextField,
-  InputLabel, Select, MenuItem } from '@mui/material'
+  InputLabel, Select, MenuItem, FormLabel, RadioGroup, Radio } from '@mui/material'
 import { Navigate, useNavigate } from 'react-router-dom'
 
 
@@ -14,19 +14,17 @@ function List() {
   const [error, setError] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState(['', '', '']);
+  const [priority, setPriority] = useState('');
   const [filters, setFilters] = useState({
     status: ['pending', 'rejected', 'approved'],
     categoryId: '',
     search: '',
     page: 1,
-    limit: 10
+    limit: 10,
+    sortBy: ''
   });
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
-
-  const handleSearchChange = useCallback((search: string) => {
-    setFilters(prev => ({ ...prev, search, page: 1 }));
-  }, []);
 
   const handleStatusChange = (e : any) => {
     const { id, checked } = e.target;
@@ -49,7 +47,12 @@ function List() {
     setFilters(prev => ({ ...prev, page }));
   }, []);
   const handleSearchClick = () => {
-    setFilters((prev) => ({...prev, categoryId: category, search: searchInput, page: 1, status: status }));
+    setFilters((prev) => ({...prev, 
+      categoryId: category, 
+      search: searchInput, 
+      page: 1, 
+      status: status, 
+      sortBy: priority }));
   };
   
   const handleFilterReset = () => {
@@ -58,14 +61,18 @@ function List() {
     categoryId: '',
     search: '',
     page: 1,
-    limit: 10
+    limit: 10,
+    sortBy: ''
   });
-
   setSearchInput('');
   setCategory('');
   setStatus(['']);
+  setPriority('');
   };
 
+  const handlePriorChange = (e: any) => {
+    setPriority(e.target.value);
+  }
 
   
   const fetchAds = async () => {
@@ -95,20 +102,22 @@ function List() {
   return (
     <div>
       <div className="filters">
-        <TextField label='Поиск по объявлениям' 
+        <div className="search-bar">
+          <TextField label='Поиск по объявлениям' 
                   variant='outlined'
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}/>
-        <Button 
-          variant='outlined'
-          onClick={handleSearchClick}>
-            Поиск
-        </Button>
-        <Button 
-          variant='outlined'
-          onClick={handleFilterReset}>
-            Сбросить настройки
-        </Button>
+          <Button 
+            variant='outlined'
+            onClick={handleSearchClick}>
+              Поиск
+          </Button>
+          <Button 
+            variant='outlined'
+            onClick={handleFilterReset}>
+              Сбросить настройки
+          </Button>
+        </div>
         <div className="filter-boxes">
           <FormGroup className='status-block'>
             <FormControlLabel control={<Checkbox 
@@ -149,6 +158,20 @@ function List() {
             <MenuItem value={'7'}>Детское</MenuItem>
           </Select>
         </FormControl>
+        <FormControl>
+          <FormLabel id="buttons-priority-label">Сортировка</FormLabel>
+          <RadioGroup
+            aria-labelledby="demo-radio-buttons-group-label"
+            name="radio-buttons-group"
+            value={priority}
+            onChange={handlePriorChange}
+          >
+            <FormControlLabel value="priority" control={<Radio />} label="По приоритету" />
+            <FormControlLabel value="createdAt" control={<Radio />} label="По дате" />
+            <FormControlLabel value="price" control={<Radio />} label="По цене" />
+            <FormControlLabel value="" control={<Radio />} label="По умолчанию" />
+          </RadioGroup>
+        </FormControl>
         </div>
       </div>
       <div className='AdsList'>
@@ -182,7 +205,8 @@ function List() {
 
               <Button 
                 variant='outlined' 
-                onClick={() => navigate(`/item/${ad.id}`)}>
+                onClick={() => navigate(`/item/${ad.id}`)}
+                color='success'>
                   Открыть
                 </Button>
             </div>
