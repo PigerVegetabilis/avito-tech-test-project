@@ -87,3 +87,33 @@
   display: block;
   margin-right: 0;
 }
+
+.status-block{
+  width: 13%;
+}
+
+.select-category{
+  width: 15%;
+}
+
+.simple-select-label{
+  display: block;
+  width: 50%;
+}
+
+.filter-boxes{
+  display: flex;
+  padding-top: 25px;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pagination{
+  padding-top: 10px;
+}
+
+.search-bar{
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
