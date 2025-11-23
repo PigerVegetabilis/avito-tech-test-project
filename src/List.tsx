@@ -39,25 +39,18 @@ function List() {
     setSearchParams(params);
   }, [filters, setSearchParams]);
 
-  const handleStatusChange = (e : any) => {
-    const { id, checked } = e.target;
-  
-    setStatus(prev => {
-      const newStatus = [...prev];
-      
-      if (id === 'pending') {
-        newStatus[0] = checked ? 'pending' : '';
-      } else if (id === 'rejected') {
-        newStatus[1] = checked ? 'rejected' : '';
-      } else if (id === 'approved') {
-        newStatus[2] = checked ? 'approved' : '';
-      }
-      
-      const filteredStatus = newStatus.filter(s => s !== '');
-      setFilters(prev => ({ ...prev, status: filteredStatus, page: 1 }));
-
-      return newStatus;
-    })
+  const handleStatusChange = (statusValue: string) => {
+    setFilters(prev => {
+    const newStatus = prev.status.includes(statusValue)
+      ? prev.status.filter(s => s !== statusValue)
+      : [...prev.status, statusValue];
+    
+    return { 
+      ...prev, 
+      status: newStatus.length > 0 ? newStatus : ['', '', ''],
+      page: 1 
+    };
+  });
   }
   const handlePageChange = useCallback((page: number) => {
     setFilters(prev => ({ ...prev, page }));
@@ -99,6 +92,14 @@ function List() {
     setFilters(prev => ({ ...prev, categoryId: e.target.value, page: 1 }));
   }
 
+  const handleOpenAd = (adId: number) => {
+  const filteredIds = ads.map((ad: any) => ad.id);
+  navigate(`/item/${adId}`, { 
+    state: { 
+      filteredIds: filteredIds
+    }
+  });
+  };
   
   const fetchAds = async () => {
     try {
@@ -118,7 +119,7 @@ function List() {
       }
 
       const response = axios.get('http://localhost:3001/api/v1/ads', {
-        params: filters
+        params: apiParams
       });
       setAds((await response).data.ads);
     }
@@ -160,22 +161,22 @@ function List() {
         <div className="filter-boxes">
           <FormGroup className='status-block'>
             <FormControlLabel control={<Checkbox 
-                checked={status[0] === 'pending'}
+                checked={filters.status.includes('pending')}
                 id='pending'
-                onChange={handleStatusChange}/>
+                onChange={() => handleStatusChange('pending')}/>
               } 
               label='На модерации' 
               />
             <FormControlLabel control={<Checkbox 
-                checked={status[1] === 'rejected'}
+                checked={filters.status.includes('rejected')}
                 id='rejected'
-                onChange={handleStatusChange}/>} 
+                onChange={() => handleStatusChange('rejected')}/>} 
               label='Отклонено'
               />
             <FormControlLabel control={<Checkbox 
-                checked={status[2] === 'approved'}
+                checked={filters.status.includes('approved')}
                 id='approved'
-                onChange={handleStatusChange}/>} 
+                onChange={() => handleStatusChange('approved')}/>} 
               label='Одобрено' 
               />
           </FormGroup>
@@ -244,7 +245,7 @@ function List() {
 
               <Button 
                 variant='outlined' 
-                onClick={() => navigate(`/item/${ad.id}`)}
+                onClick={() => handleOpenAd(ad.id)}
                 color='success'>
                   Открыть
                 </Button>
