@@ -11,6 +11,7 @@ function List() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [ads, setAds] = useState([]);
+  const [allFilteredAds, setAllFilteredAds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
@@ -25,7 +26,35 @@ function List() {
   const [status, setStatus] = useState(filters.status);
   const [priority, setPriority] = useState(filters.sortBy);
   const [searchInput, setSearchInput] = useState(filters.search);
-  const [page, setPage] = useState(filters.page);
+
+  const fetchAllFilteredIds = async () => {
+      try {
+        const apiParams: any = {
+          limit: 1000, // Большой лимит чтобы получить все
+          fields: 'id' // Запрашиваем только ID для экономии
+        };
+        
+        if (filters.search) apiParams.search = filters.search;
+        if (filters.categoryId) apiParams.categoryId = filters.categoryId;
+        if (filters.sortBy) apiParams.sortBy = filters.sortBy;
+        
+        if (filters.status.length > 0) {
+          apiParams.status = filters.status;
+        }
+
+        const response = await axios.get('http://localhost:3001/api/v1/ads', {
+          params: apiParams
+        });
+        
+        const allIds = response.data.ads.map((ad: any) => ad.id);
+        setAllFilteredAds(allIds);
+        
+        console.log('All filtered IDs:', allIds.length); // Для отладки
+      } catch (err) {
+        console.error('Error fetching all filtered IDs:', err);
+      }
+  };
+
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -96,7 +125,7 @@ function List() {
   const filteredIds = ads.map((ad: any) => ad.id);
   navigate(`/item/${adId}`, { 
     state: { 
-      filteredIds: filteredIds
+      filteredIds: allFilteredAds
     }
   });
   };
@@ -134,6 +163,7 @@ function List() {
 
   useEffect(() => {
     fetchAds();
+    fetchAllFilteredIds();
   }, [filters]);
 
   if (loading) return <div className="loading">Загрузка объявлений...</div>;
