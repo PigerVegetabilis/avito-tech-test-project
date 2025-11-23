@@ -4,27 +4,40 @@ import axios from 'axios'
 import { Button, Checkbox, FormControl,
   FormControlLabel, FormGroup, TextField,
   InputLabel, Select, MenuItem, FormLabel, RadioGroup, Radio } from '@mui/material'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 
 
 function List() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [category, setCategory] = useState('');
-  const [status, setStatus] = useState(['', '', '']);
-  const [priority, setPriority] = useState('');
   const [filters, setFilters] = useState({
-    status: ['pending', 'rejected', 'approved'],
-    categoryId: '',
-    search: '',
-    page: 1,
+    status: searchParams.get('status')?.split(',') || ['pending', 'rejected', 'approved'],
+    categoryId: searchParams.get('category') || '',
+    search: searchParams.get('search') || '',
+    page: parseInt(searchParams.get('page') || '1'),
     limit: 10,
-    sortBy: ''
+    sortBy: searchParams.get('sort') ||''
   });
-  const [searchInput, setSearchInput] = useState('');
-  const [page, setPage] = useState(1);
+  const [category, setCategory] = useState(filters.categoryId);
+  const [status, setStatus] = useState(filters.status);
+  const [priority, setPriority] = useState(filters.sortBy);
+  const [searchInput, setSearchInput] = useState(filters.search);
+  const [page, setPage] = useState(filters.page);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (filters.status.length > 0) params.set('status', filters.status.join(','));
+    if (filters.categoryId) params.set('category', filters.categoryId);
+    if (filters.search) params.set('search', filters.search);
+    if (filters.page > 1) params.set('page', filters.page.toString());
+    if (filters.sortBy) params.set('sort', filters.sortBy);
+    
+    setSearchParams(params);
+  }, [filters, setSearchParams]);
 
   const handleStatusChange = (e : any) => {
     const { id, checked } = e.target;
@@ -40,12 +53,16 @@ function List() {
         newStatus[2] = checked ? 'approved' : '';
       }
       
+      const filteredStatus = newStatus.filter(s => s !== '');
+      setFilters(prev => ({ ...prev, status: filteredStatus, page: 1 }));
+
       return newStatus;
     })
   }
   const handlePageChange = useCallback((page: number) => {
     setFilters(prev => ({ ...prev, page }));
   }, []);
+
   const handleSearchClick = () => {
     setFilters((prev) => ({...prev, 
       categoryId: category, 
@@ -63,21 +80,43 @@ function List() {
     page: 1,
     limit: 10,
     sortBy: ''
-  });
-  setSearchInput('');
-  setCategory('');
-  setStatus(['']);
-  setPriority('');
+    });
+    
+    setSearchInput('');
+    setCategory('');
+    setStatus(['']);
+    setPriority('');
+    setSearchParams({});
   };
 
   const handlePriorChange = (e: any) => {
     setPriority(e.target.value);
+    setFilters(prev => ({ ...prev, sortBy: e.target.value, page: 1 }));
+  }
+
+  const handleCategoryChange = (e: any) => {
+    setCategory(e.target.value);
+    setFilters(prev => ({ ...prev, categoryId: e.target.value, page: 1 }));
   }
 
   
   const fetchAds = async () => {
     try {
       setLoading(true);
+
+      const apiParams: any = {
+        page: filters.page,
+        limit: filters.limit
+      };
+      
+      if (filters.search) apiParams.search = filters.search;
+      if (filters.categoryId) apiParams.categoryId = filters.categoryId;
+      if (filters.sortBy) apiParams.sortBy = filters.sortBy;
+      
+      if (filters.status.length > 0) {
+        apiParams.status = filters.status;
+      }
+
       const response = axios.get('http://localhost:3001/api/v1/ads', {
         params: filters
       });
@@ -147,7 +186,7 @@ function List() {
             id="simple-select"
             value={category}
             label="Age"
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={handleCategoryChange}
           >
             <MenuItem value={'1'}>Недвижимость</MenuItem>
             <MenuItem value={'2'}>Транспорт</MenuItem>
