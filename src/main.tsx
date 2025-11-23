@@ -4,6 +4,7 @@ import './index.css'
 import List from './List.tsx'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Item from './Item.tsx'
+import Stats from './Stats.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -12,6 +13,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path='/list' element={<List />} />
         <Route path='*' element={<Navigate to='/list' replace />} />
         <Route path="/item/:id" element={<Item />} />
+        <Route path='/stats' element={<Stats/>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
